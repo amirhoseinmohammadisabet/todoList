@@ -1,90 +1,53 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box
-}
+/**
+ * @class Model
+ *
+ * Manages the data of the application.
+ */
+class Model {
+  constructor() {
+    this.todos = JSON.parse(localStorage.getItem('todos')) || []
+  }
 
-html {
-  font-family: sans-serif;
-  font-size: 1rem;
-  color: #444;
-}
+  bindTodoListChanged(callback) {
+    this.onTodoListChanged = callback
+  }
 
-#root {
-  max-width: 450px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-}
+  _commit(todos) {
+    this.onTodoListChanged(todos)
+    localStorage.setItem('todos', JSON.stringify(todos))
+  }
 
-form {
-  display: flex;
-  margin-bottom: 2rem;
-}
+  addTodo(todoText) {
+    const todo = {
+      id: this.todos.length > 0 ? this.todos[this.todos.length - 1].id + 1 : 1,
+      text: todoText,
+      complete: false,
+    }
 
-[type="text"],
-button {
-  display: inline-block;
-  -webkit-appearance: none;
-  padding: .5rem 1rem;
-  font-size: 1rem;
-  border: 2px solid #ccc;
-  border-radius: 4px;
-}
+    this.todos.push(todo)
 
-button {
-  cursor: pointer;
-  background: #007bff;
-  color: white;
-  border: 2px solid #007bff;
-  margin: 0 .5rem;
-}
+    this._commit(this.todos)
+  }
 
-[type="text"] {
-  width: 100%;
-}
+  editTodo(id, updatedText) {
+    this.todos = this.todos.map(todo =>
+      todo.id === id ? { id: todo.id, text: updatedText, complete: todo.complete } : todo
+    )
 
-[type="text"]:active,
-[type="text"]:focus {
-  outline: 0;
-  border: 2px solid #007bff;
-}
+    this._commit(this.todos)
+  }
 
-[type="checkbox"] {
-  margin-right: 1rem;
-  font-size: 2rem;
-}
+  deleteTodo(id) {
+    this.todos = this.todos.filter(todo => todo.id !== id)
 
-h1 {
-  color: #222;
-}
+    this._commit(this.todos)
+  }
 
-ul {
-  padding: 0;
-}
+  toggleTodo(id) {
+    this.todos = this.todos.map(todo =>
+      todo.id === id ? { id: todo.id, text: todo.text, complete: !todo.complete } : todo
+    )
 
-li {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: #f4f4f4;
-  border-radius: 4px;
-}
-
-li span {
-  display: inline-block;
-  padding: .5rem;
-  width: 250px;
-  border-radius: 4px;
-  border: 2px solid transparent;
-}
-
-li span:hover {
-  background: rgba(179, 215, 255, 0.52);
-}
-
-li span:focus {
-  outline: 0;
-  border: 2px solid #007bff;
-  background: rgba(179, 207, 255, 0.52)
+    this._commit(this.todos)
+  }
 }
